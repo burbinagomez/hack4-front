@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { useToast } from "@/hooks/use-toast";
-import { motion } from "@/components/ui/motion";
+import { motion } from "framer-motion";
 
 interface OtpVerificationProps {
   email: string;

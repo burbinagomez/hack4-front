@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { AnimatePresence, motion } from "@/components/ui/motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { validateDomain, validateEmailDomainMatch } from "@/lib/validation";
 import OtpVerification from "@/components/OtpVerification";
 
