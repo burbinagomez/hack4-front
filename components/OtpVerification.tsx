@@ -123,8 +123,8 @@ export default function OtpVerification({ email, domain, onBack, onComplete }: O
               disabled={isLoading}
               render={({ slots }) => (
                 <InputOTPGroup>
-                  {slots.map((slot, index) => (
-                    <InputOTPSlot key={index} {...slot} />
+                  {slots.map((slot, idx) => (
+                    <InputOTPSlot key={idx} {...slot} index={idx} />
                   ))}
                 </InputOTPGroup>
               )}
