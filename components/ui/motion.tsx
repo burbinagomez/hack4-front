@@ -1,8 +1,8 @@
 "use client";
 
-import { HTMLMotionProps, motion as framerMotion } from "framer-motion";
+import { AnimatePresence, HTMLMotionProps, motion } from "framer-motion";
 
-export const motion = framerMotion;
+export { motion };
 
 export type AnimationProps = HTMLMotionProps<"div">;
 
@@ -11,7 +11,6 @@ export interface AnimatePresenceProps {
   mode?: "sync" | "wait" | "popLayout";
 }
 
-export const AnimatePresence = ({ children, mode = "wait" }: AnimatePresenceProps) => {
-  const { AnimatePresence: FramerAnimatePresence } = framerMotion;
-  return <FramerAnimatePresence mode={mode}>{children}</FramerAnimatePresence>;
+export const AnimatePresenceWrapper = ({ children, mode = "wait" }: AnimatePresenceProps) => {
+  return <AnimatePresence mode={mode}>{children}</AnimatePresence>;
 };
