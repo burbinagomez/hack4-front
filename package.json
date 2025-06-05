@@ -1,7 +1,5 @@
 {
   "dependencies": {
-    "@aws-sdk/client-cognito-identity-provider": "^3.450.0",
-    "aws-jwt-verify": "^4.0.0",
     "framer-motion": "^10.16.4"
   }
 }
