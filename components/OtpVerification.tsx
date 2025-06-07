@@ -7,6 +7,8 @@ import { Loader2 } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import { supabase } from "@/lib/supabase";
+import type { AuthError } from "@supabase/supabase-js";
 
 interface OtpVerificationProps {
   email: string;
@@ -33,32 +35,42 @@ export default function OtpVerification({ email, domain, onBack, onComplete }: O
 
     setIsLoading(true);
     try {
-      const response = await fetch("/api/verify-otp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ domain, email, otp }),
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: 'email'
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to verify OTP");
+      if (error) {
+        throw error;
       }
 
-      if (result.success) {
+      if (data.user) {
         toast({
           title: "Verification Successful",
-          description: "Your domain ownership has been verified.",
+          description: "Your email has been verified and you are now authenticated.",
         });
         onComplete();
       }
-    } catch (error) {
+    } catch (error: any) {
+      const authError = error as AuthError;
+      let errorMessage = "Failed to verify OTP";
+      
+      // Handle specific Supabase auth errors
+      if (authError.message) {
+        if (authError.message.includes('expired')) {
+          errorMessage = "The verification code has expired. Please request a new one.";
+        } else if (authError.message.includes('invalid')) {
+          errorMessage = "Invalid verification code. Please check and try again.";
+        } else {
+          errorMessage = authError.message;
+        }
+      }
+
       toast({
         variant: "destructive",
         title: "Verification Failed",
-        description: error instanceof Error ? error.message : "Failed to verify OTP",
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
@@ -68,31 +80,33 @@ export default function OtpVerification({ email, domain, onBack, onComplete }: O
   const handleResend = async () => {
     setIsResending(true);
     try {
-      const response = await fetch("/api/validate-email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ domain, email }),
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: {
+            domain: domain,
+          }
+        }
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Failed to resend OTP");
+      if (error) {
+        throw error;
       }
 
-      if (result.success && result.otpSent) {
-        toast({
-          title: "OTP Resent",
-          description: "Please check your email for the new verification code.",
-        });
-      }
-    } catch (error) {
+      toast({
+        title: "OTP Resent",
+        description: "Please check your email for the new verification code.",
+      });
+      
+      // Clear the current OTP input
+      setOtp("");
+    } catch (error: any) {
+      const authError = error as AuthError;
       toast({
         variant: "destructive",
         title: "Failed to Resend",
-        description: error instanceof Error ? error.message : "Failed to resend OTP",
+        description: authError.message || "Failed to resend verification code",
       });
     } finally {
       setIsResending(false);
@@ -136,7 +150,7 @@ export default function OtpVerification({ email, domain, onBack, onComplete }: O
               size="sm"
               className="text-sm text-muted-foreground"
               onClick={handleResend}
-              disabled={isResending}
+              disabled={isResending || isLoading}
             >
               {isResending ? (
                 <>
@@ -153,7 +167,11 @@ export default function OtpVerification({ email, domain, onBack, onComplete }: O
           <Button variant="outline" onClick={onBack} disabled={isLoading}>
             Back
           </Button>
-          <Button className="flex-1" onClick={handleVerify} disabled={isLoading || otp.length !== 6}>
+          <Button 
+            className="flex-1" 
+            onClick={handleVerify} 
+            disabled={isLoading || otp.length !== 6}
+          >
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

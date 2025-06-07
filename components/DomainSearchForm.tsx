@@ -13,8 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 import { AnimatePresence, motion } from "framer-motion";
 import { validateDomain, validateEmailDomainMatch } from "@/lib/validation";
 import OtpVerification from "@/components/OtpVerification";
-import { useAuth } from "react-oidc-context";
-
+import { supabase } from "@/lib/supabase";
+import type { User } from "@supabase/supabase-js";
 
 // Define the form schemas for different stages
 const domainSchema = z.object({
@@ -43,24 +43,41 @@ export default function DomainSearchForm() {
   const [domain, setDomain] = useState("");
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
-  const auth = useAuth();
 
   useEffect(() => {
-    // Only update the stage if the user is authenticated and the stage is not already 'complete'
-    if (auth.isAuthenticated && stage !== "complete") {
-      setStage("complete");
-      // Optional: Add a toast message or other side effects here
-      toast({
-        title: "Authenticated",
-        description: "You are already logged in.",
-      });
-    } else if (!auth.isAuthenticated && stage === "complete") {
-        // Optional: If user logs out, revert to domain stage or another initial stage
-        setStage("domain");
-        resetForm(); // Reset form if user logs out
-    }
-  }, [auth.isAuthenticated, stage, toast])
+    // Check for existing session
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser(session.user);
+        setStage("complete");
+      }
+    };
+
+    checkSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          setUser(session.user);
+          setStage("complete");
+          toast({
+            title: "Authentication Successful",
+            description: "You have been successfully authenticated.",
+          });
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+          setStage("domain");
+          resetForm();
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [toast]);
 
   // Domain form
   const domainForm = useForm<DomainFormValues>({
@@ -81,27 +98,15 @@ export default function DomainSearchForm() {
   const onDomainSubmit = async (data: DomainFormValues) => {
     setIsLoading(true);
     try {
-      // const response = await fetch("/api/validate-domain", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({ domain: data.domain }),
-      // });
-
-      // const result = await response.json();
-
-      // if (!response.ok) {
-      //   throw new Error(result.error || "Failed to validate domain");
-      // }
-    
-        setDomain(data.domain);
-        setStage("email");
-        toast({
-          title: "Domain Validated",
-          description: "Please enter an email associated with this domain.",
-        });
+      // Simulate domain validation - replace with actual API call if needed
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
+      setDomain(data.domain);
+      setStage("email");
+      toast({
+        title: "Domain Validated",
+        description: "Please enter an email associated with this domain.",
+      });
     } catch (error) {
       toast({
         variant: "destructive",
@@ -116,54 +121,32 @@ export default function DomainSearchForm() {
   const onEmailSubmit = async (data: EmailFormValues) => {
     setIsLoading(true);
     try {
-      console.log(auth)
-      if(!auth.isAuthenticated){
-        const response_api = await fetch(process.env.NEXT_PUBLIC_API+"/user", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: data.email }),
-        });
+      // Send OTP using Supabase
+      const { error } = await supabase.auth.signInWithOtp({
+        email: data.email,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: {
+            domain: domain,
+          }
+        }
+      });
 
-        const result = await response_api.json();
-        console.log(result)
-        
-      }else{
-        await auth.signoutSilent()
+      if (error) {
+        throw error;
       }
-      const response = await auth.signinRedirect()
-      
-      // const response = await fetch("/api/validate-email", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({ domain, email: data.email }),
-      // });
 
-      // const result = await response.json();
-
-      // console.log(response)
-      
-
-      // if (!response.ok) {
-      //   throw new Error(result.error || "Failed to validate email");
-      // }
-
-      // if (result.success && result.otpSent) {
-      //   setEmail(data.email);
-      //   setStage("otp");
-      //   toast({
-      //     title: "OTP Sent",
-      //     description: "Please check your email for the verification code.",
-      //   });
-      // }
-    } catch (error) {
+      setEmail(data.email);
+      setStage("otp");
+      toast({
+        title: "OTP Sent",
+        description: "Please check your email for the verification code.",
+      });
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Email Validation Failed",
-        description: error instanceof Error ? error.message : "Failed to validate email",
+        description: error.message || "Failed to send verification code",
       });
     } finally {
       setIsLoading(false);
@@ -178,9 +161,26 @@ export default function DomainSearchForm() {
     setEmail("");
   };
 
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast({
+        title: "Signed Out",
+        description: "You have been successfully signed out.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Sign Out Failed",
+        description: error.message || "Failed to sign out",
+      });
+    }
+  };
+
   return (
     <AnimatePresence mode="wait">
-
       {stage === "domain" && (
         <motion.div
           key="domain-form"
@@ -285,13 +285,13 @@ export default function DomainSearchForm() {
           email={email} 
           domain={domain} 
           onBack={() => setStage("email")} 
-          onComplete={resetForm} 
+          onComplete={() => setStage("complete")} 
         />
       )}
 
       {stage === "complete" && (
         <motion.div
-          key="domain-form"
+          key="complete-form"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
@@ -299,9 +299,33 @@ export default function DomainSearchForm() {
         >
           <Card>
             <CardHeader>
-              <CardTitle>Search Domain</CardTitle>
-              <CardDescription>Report in proccess, please verify your email</CardDescription>
+              <CardTitle>Authentication Complete</CardTitle>
+              <CardDescription>
+                Welcome! Your domain verification is in progress.
+                {user?.email && ` Authenticated as: ${user.email}`}
+              </CardDescription>
             </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-green-800 text-sm">
+                    ✅ Authentication successful! Your report is being processed.
+                  </p>
+                </div>
+                {domain && (
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-blue-800 text-sm">
+                      📊 Domain: <strong>{domain}</strong>
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button variant="outline" onClick={handleSignOut} className="w-full">
+                Sign Out
+              </Button>
+            </CardFooter>
           </Card>
         </motion.div>
       )}
