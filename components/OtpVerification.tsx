@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { useToast } from "@/hooks/use-toast";
-import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import type { AuthError } from "@supabase/supabase-js";
 
@@ -114,75 +113,66 @@ export default function OtpVerification({ email, domain, onBack, onComplete }: O
   };
 
   return (
-    <motion.div
-      key="otp-verification"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.3 }}
-    >
-      <Card>
-        <CardHeader>
-          <CardTitle>Verify OTP</CardTitle>
-          <CardDescription>
-            Enter the 6-digit code sent to {email}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex justify-center">
-            <InputOTP
-              maxLength={6}
-              value={otp}
-              onChange={setOtp}
-              disabled={isLoading}
-              render={({ slots }) => (
-                <InputOTPGroup>
-                  {slots.map((slot, idx) => (
-                    <InputOTPSlot key={idx} {...slot} index={idx} />
-                  ))}
-                </InputOTPGroup>
-              )}
-            />
-          </div>
-          <div className="text-center">
-            <Button
-              variant="link"
-              size="sm"
-              className="text-sm text-muted-foreground"
-              onClick={handleResend}
-              disabled={isResending || isLoading}
-            >
-              {isResending ? (
-                <>
-                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                  Resending...
-                </>
-              ) : (
-                "Didn't receive code? Resend"
-              )}
-            </Button>
-          </div>
-        </CardContent>
-        <CardFooter className="flex justify-between gap-2">
-          <Button variant="outline" onClick={onBack} disabled={isLoading}>
-            Back
-          </Button>
-          <Button 
-            className="flex-1" 
-            onClick={handleVerify} 
-            disabled={isLoading || otp.length !== 6}
+    <Card>
+      <CardHeader>
+        <CardTitle>Verify OTP</CardTitle>
+        <CardDescription>
+          Enter the 6-digit code sent to {email}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex justify-center">
+          <InputOTP
+            maxLength={6}
+            value={otp}
+            onChange={setOtp}
+            disabled={isLoading}
           >
-            {isLoading ? (
+            <InputOTPGroup>
+              {Array.from({ length: 6 }, (_, index) => (
+                <InputOTPSlot key={index} index={index} />
+              ))}
+            </InputOTPGroup>
+          </InputOTP>
+        </div>
+        <div className="text-center">
+          <Button
+            variant="link"
+            size="sm"
+            className="text-sm text-muted-foreground"
+            onClick={handleResend}
+            disabled={isResending || isLoading}
+          >
+            {isResending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Verifying...
+                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                Resending...
               </>
             ) : (
-              "Verify"
+              "Didn't receive code? Resend"
             )}
           </Button>
-        </CardFooter>
-      </Card>
-    </motion.div>
+        </div>
+      </CardContent>
+      <CardFooter className="flex justify-between gap-2">
+        <Button variant="outline" onClick={onBack} disabled={isLoading}>
+          Back
+        </Button>
+        <Button 
+          className="flex-1" 
+          onClick={handleVerify} 
+          disabled={isLoading || otp.length !== 6}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Verifying...
+            </>
+          ) : (
+            "Verify"
+          )}
+        </Button>
+      </CardFooter>
+    </Card>
   );
 }
