@@ -105,7 +105,7 @@ export default function DomainSearchForm() {
         options: {
           emailRedirectTo: window.location.origin,
           data: {
-            domain: domain,
+            domain: window.location.origin,
           }
         }
       });
