@@ -45,8 +45,11 @@ export default function OtpVerification({ email, domain, onBack, onComplete }: O
       }
 
       if (data.user) {
+        const headers = new Headers();
+        headers.append("x-api-key", process.env.NEXT_PUBLIC_API_KEY);
         fetch(process.env.NEXT_PUBLIC_API+"/report",{
           method: "POST",
+          headers,
           body: JSON.stringify({ email }),
         })
         toast({
