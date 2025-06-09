@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AnimatePresence, motion } from "framer-motion";
-import { validateDomain, validateEmailDomainMatch } from "@/lib/validation";
+import { validateDomain } from "@/lib/validation";
 import OtpVerification from "@/components/OtpVerification";
 import { supabase } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
@@ -29,9 +29,9 @@ const createEmailSchema = (domain: string) => {
       .string()
       .min(1, "Email is required")
       .email("Please enter a valid email address")
-      .refine((email) => validateEmailDomainMatch(email, domain), {
-        message: `Email must be associated with ${domain}`,
-      }),
+      // .refine((email) => validateEmailDomainMatch(email, domain), {
+      //   message: `Email must be associated with ${domain}`,
+      // }),
   });
 };
 
@@ -39,7 +39,7 @@ type DomainFormValues = z.infer<typeof domainSchema>;
 type EmailFormValues = z.infer<ReturnType<typeof createEmailSchema>>;
 
 export default function DomainSearchForm() {
-  const [stage, setStage] = useState<"domain" | "email" | "otp" | "complete">("domain");
+  const [stage, setStage] = useState<"email" | "otp" | "complete">("email");
   const [domain, setDomain] = useState("");
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -70,7 +70,7 @@ export default function DomainSearchForm() {
           });
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
-          setStage("domain");
+          setStage("email");
           resetForm();
         }
       }
@@ -95,33 +95,11 @@ export default function DomainSearchForm() {
     },
   });
 
-  const onDomainSubmit = async (data: DomainFormValues) => {
-    setIsLoading(true);
-    try {
-      // Simulate domain validation - replace with actual API call if needed
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setDomain(data.domain);
-      setStage("email");
-      toast({
-        title: "Domain Validated",
-        description: "Please enter an email associated with this domain.",
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Validation Failed",
-        description: error instanceof Error ? error.message : "Failed to validate domain",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const onEmailSubmit = async (data: EmailFormValues) => {
     setIsLoading(true);
     try {
       // Send OTP using Supabase
+      setDomain(data.email.split("@")[1])
       const { error } = await supabase.auth.signInWithOtp({
         email: data.email,
         options: {
@@ -154,9 +132,8 @@ export default function DomainSearchForm() {
   };
 
   const resetForm = () => {
-    domainForm.reset();
     emailForm.reset();
-    setStage("domain");
+    setStage("email");
     setDomain("");
     setEmail("");
   };
@@ -181,54 +158,6 @@ export default function DomainSearchForm() {
 
   return (
     <AnimatePresence mode="wait">
-      {stage === "domain" && (
-        <motion.div
-          key="domain-form"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Card>
-            <CardHeader>
-              <CardTitle>Search Domain</CardTitle>
-              <CardDescription>Enter a domain to start verification</CardDescription>
-            </CardHeader>
-            <Form {...domainForm}>
-              <form onSubmit={domainForm.handleSubmit(onDomainSubmit)}>
-                <CardContent>
-                  <FormField
-                    control={domainForm.control}
-                    name="domain"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Domain</FormLabel>
-                        <FormControl>
-                          <Input placeholder="example.com" {...field} disabled={isLoading} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-                <CardFooter>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Validating...
-                      </>
-                    ) : (
-                      "Search Domain"
-                    )}
-                  </Button>
-                </CardFooter>
-              </form>
-            </Form>
-          </Card>
-        </motion.div>
-      )}
-
       {stage === "email" && (
         <motion.div
           key="email-form"
@@ -252,7 +181,7 @@ export default function DomainSearchForm() {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input placeholder={`yourname@${domain}`} {...field} disabled={isLoading} />
+                          <Input placeholder={`yourname@example.com`} {...field} disabled={isLoading} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -260,9 +189,7 @@ export default function DomainSearchForm() {
                   />
                 </CardContent>
                 <CardFooter className="flex justify-between gap-2">
-                  <Button variant="outline" onClick={resetForm} disabled={isLoading}>
-                    Back
-                  </Button>
+                  
                   <Button type="submit" className="flex-1" disabled={isLoading}>
                     {isLoading ? (
                       <>
