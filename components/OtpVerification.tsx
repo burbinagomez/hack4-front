@@ -45,9 +45,13 @@ export default function OtpVerification({ email, domain, onBack, onComplete }: O
       }
 
       if (data.user) {
+        fetch(process.env.NEXT_PUBLIC_API+"/report",{
+          method: "POST",
+          body: JSON.stringify({ email }),
+        })
         toast({
           title: "Verification Successful",
-          description: "Your email has been verified and you are now authenticated.",
+          description: "Your email has been verified in few minutes we will send you a report with vulnerabilities of your domain.",
         });
         onComplete();
       }

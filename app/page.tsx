@@ -12,7 +12,7 @@ export default function Home() {
         <div className="space-y-4 mb-8 text-center">
           <h1 className="text-3xl font-bold tracking-tight">Domain Lookup</h1>
           <p className="text-muted-foreground">
-            Search for a domain and verify your ownership with email validation
+            Search vulnerabilities in your domain
           </p>
         </div>
 
