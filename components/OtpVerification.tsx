@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -18,7 +17,6 @@ interface OtpVerificationProps {
 }
 
 export default function OtpVerification({ email, domain, onBack, onComplete }: OtpVerificationProps) {
-  const router = useRouter();
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
@@ -56,18 +54,11 @@ export default function OtpVerification({ email, domain, onBack, onComplete }: O
           headers,
           body: JSON.stringify({ email }),
         })
-        
         toast({
           title: "Verification Successful",
-          description: "Your email has been verified. Redirecting to dashboard...",
+          description: "Your email has been verified in few minutes we will send you a report with vulnerabilities of your domain.",
         });
-        
         onComplete();
-        
-        // Redirect to dashboard after successful verification
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 2000);
       }
     } catch (error: any) {
       const authError = error as AuthError;
@@ -100,7 +91,7 @@ export default function OtpVerification({ email, domain, onBack, onComplete }: O
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
+          emailRedirectTo: window.location.origin,
           data: {
             domain: domain,
           }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -40,7 +39,6 @@ type DomainFormValues = z.infer<typeof domainSchema>;
 type EmailFormValues = z.infer<ReturnType<typeof createEmailSchema>>;
 
 export default function DomainSearchForm() {
-  const router = useRouter();
   const [stage, setStage] = useState<"email" | "otp" | "complete">("email");
   const [domain, setDomain] = useState("");
   const [email, setEmail] = useState("");
@@ -70,11 +68,6 @@ export default function DomainSearchForm() {
             title: "Authentication Successful",
             description: "You have been successfully authenticated.",
           });
-          
-          // Redirect to dashboard after successful authentication
-          setTimeout(() => {
-            router.push('/dashboard');
-          }, 2000);
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
           setStage("email");
@@ -84,7 +77,7 @@ export default function DomainSearchForm() {
     );
 
     return () => subscription.unsubscribe();
-  }, [toast, router]);
+  }, [toast]);
 
   // Domain form
   const domainForm = useForm<DomainFormValues>({
@@ -110,9 +103,9 @@ export default function DomainSearchForm() {
       const { error } = await supabase.auth.signInWithOtp({
         email: data.email,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
+          emailRedirectTo: window.location.origin,
           data: {
-            domain: data.email.split("@")[1],
+            domain: window.location.origin,
           }
         }
       });
@@ -161,10 +154,6 @@ export default function DomainSearchForm() {
         description: error.message || "Failed to sign out",
       });
     }
-  };
-
-  const handleGoToDashboard = () => {
-    router.push('/dashboard');
   };
 
   return (
@@ -259,11 +248,8 @@ export default function DomainSearchForm() {
                 )}
               </div>
             </CardContent>
-            <CardFooter className="flex gap-2">
-              <Button onClick={handleGoToDashboard} className="flex-1">
-                Go to Dashboard
-              </Button>
-              <Button variant="outline" onClick={handleSignOut}>
+            <CardFooter>
+              <Button variant="outline" onClick={handleSignOut} className="w-full">
                 Sign Out
               </Button>
             </CardFooter>
