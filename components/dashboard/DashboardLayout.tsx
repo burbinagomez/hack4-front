@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -19,26 +20,22 @@ const navigationItems = [
   {
     title: 'Dashboard',
     icon: BarChart3,
-    href: '/dashboard',
-    active: true
+    href: '/dashboard'
   },
   {
     title: 'Subdomains',
     icon: Globe,
-    href: '/dashboard/subdomains',
-    active: false
+    href: '/dashboard/subdomains'
   },
   {
     title: 'Vulnerabilities',
     icon: Shield,
-    href: '/dashboard/vulnerabilities',
-    active: false
+    href: '/dashboard/vulnerabilities'
   },
   {
     title: 'Settings',
     icon: Settings,
-    href: '/dashboard/settings',
-    active: false
+    href: '/dashboard/settings'
   }
 ];
 
@@ -47,9 +44,11 @@ interface SidebarProps {
   currentUser: SupabaseUser | null;
   onSignOut: () => void;
   isLoading: boolean;
+  currentPath: string;
+  onLinkClick?: () => void;
 }
 
-function Sidebar({ className, currentUser, onSignOut, isLoading }: SidebarProps) {
+function Sidebar({ className, currentUser, onSignOut, isLoading, currentPath, onLinkClick }: SidebarProps) {
   const getUserInitials = (email: string) => {
     return email.split('@')[0].slice(0, 2).toUpperCase();
   };
@@ -61,26 +60,30 @@ function Sidebar({ className, currentUser, onSignOut, isLoading }: SidebarProps)
   return (
     <div className={cn("flex h-full flex-col bg-card border-r", className)}>
       <div className="flex h-16 items-center border-b px-6">
-        <div className="flex items-center gap-2 font-semibold">
+        <Link href="/dashboard" className="flex items-center gap-2 font-semibold hover:opacity-80 transition-opacity">
           <Shield className="h-6 w-6 text-primary" />
           <span>SecureDomain</span>
-        </div>
+        </Link>
       </div>
       
       <nav className="flex-1 space-y-2 p-4">
-        {navigationItems.map((item) => (
-          <Button
-            key={item.href}
-            variant={item.active ? "default" : "ghost"}
-            className={cn(
-              "w-full justify-start gap-2",
-              item.active && "bg-primary text-primary-foreground"
-            )}
-          >
-            <item.icon className="h-4 w-4" />
-            {item.title}
-          </Button>
-        ))}
+        {navigationItems.map((item) => {
+          const isActive = currentPath === item.href;
+          return (
+            <Link key={item.href} href={item.href} onClick={onLinkClick}>
+              <Button
+                variant={isActive ? "default" : "ghost"}
+                className={cn(
+                  "w-full justify-start gap-2 transition-colors",
+                  isActive && "bg-primary text-primary-foreground shadow-sm"
+                )}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.title}
+              </Button>
+            </Link>
+          );
+        })}
       </nav>
       
       <div className="border-t p-4 space-y-3">
@@ -131,6 +134,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -209,6 +213,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   };
 
+  const getPageTitle = () => {
+    const currentItem = navigationItems.find(item => item.href === pathname);
+    return currentItem ? currentItem.title : 'Dashboard';
+  };
+
   // Show loading spinner while checking authentication
   if (isLoading) {
     return (
@@ -229,6 +238,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           currentUser={currentUser} 
           onSignOut={handleSignOut}
           isLoading={isLoading}
+          currentPath={pathname}
         />
       </div>
 
@@ -248,6 +258,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             currentUser={currentUser} 
             onSignOut={handleSignOut}
             isLoading={isLoading}
+            currentPath={pathname}
+            onLinkClick={() => setSidebarOpen(false)}
           />
         </SheetContent>
       </Sheet>
@@ -256,7 +268,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="h-16 border-b bg-card flex items-center justify-between px-6">
           <div className="lg:hidden" /> {/* Spacer for mobile menu button */}
-          <h1 className="text-xl font-semibold">Dashboard</h1>
+          <h1 className="text-xl font-semibold">{getPageTitle()}</h1>
           <div className="flex items-center gap-4">
             {currentUser && (
               <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">

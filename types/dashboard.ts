@@ -29,3 +29,19 @@ export interface DashboardFilters {
 
 export type SortField = 'scanDate' | 'subdomainsDiscovered' | 'vulnerabilitiesDetected';
 export type SortDirection = 'asc' | 'desc';
+
+// New interfaces for subdomain management
+export interface SubdomainData {
+  id: string;
+  name: string;
+  url: string;
+  sslStatus: 'active' | 'inactive' | 'expired' | 'pending';
+  usageStatus: 'in-use' | 'not-in-use' | 'maintenance';
+  lastChecked: string;
+  certificateExpiry?: string;
+  ipAddress?: string;
+  responseTime?: number;
+  httpStatus?: number;
+}
+
+export type SubdomainSortField = 'name' | 'sslStatus' | 'usageStatus' | 'lastChecked';
