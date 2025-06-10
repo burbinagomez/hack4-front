@@ -1,10 +1,15 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Shield, Globe, BarChart3, Settings, User } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Menu, Shield, Globe, BarChart3, Settings, User, LogOut, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -37,7 +42,22 @@ const navigationItems = [
   }
 ];
 
-function Sidebar({ className }: { className?: string }) {
+interface SidebarProps {
+  className?: string;
+  currentUser: SupabaseUser | null;
+  onSignOut: () => void;
+  isLoading: boolean;
+}
+
+function Sidebar({ className, currentUser, onSignOut, isLoading }: SidebarProps) {
+  const getUserInitials = (email: string) => {
+    return email.split('@')[0].slice(0, 2).toUpperCase();
+  };
+
+  const getUserDisplayName = (email: string) => {
+    return email.split('@')[0];
+  };
+
   return (
     <div className={cn("flex h-full flex-col bg-card border-r", className)}>
       <div className="flex h-16 items-center border-b px-6">
@@ -63,11 +83,44 @@ function Sidebar({ className }: { className?: string }) {
         ))}
       </nav>
       
-      <div className="border-t p-4">
-        <Button variant="ghost" className="w-full justify-start gap-2">
-          <User className="h-4 w-4" />
-          Profile
-        </Button>
+      <div className="border-t p-4 space-y-3">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-4">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : currentUser ? (
+          <>
+            <div className="flex items-center gap-3 p-2 rounded-lg bg-muted/50">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={currentUser.user_metadata?.avatar_url} />
+                <AvatarFallback className="text-xs font-medium">
+                  {getUserInitials(currentUser.email || '')}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">
+                  {currentUser.user_metadata?.full_name || getUserDisplayName(currentUser.email || '')}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {currentUser.email}
+                </p>
+              </div>
+            </div>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={onSignOut}
+            >
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </Button>
+          </>
+        ) : (
+          <Button variant="ghost" className="w-full justify-start gap-2">
+            <User className="h-4 w-4" />
+            Not Authenticated
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -75,12 +128,108 @@ function Sidebar({ className }: { className?: string }) {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    let mounted = true;
+
+    const getSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+          if (mounted) {
+            router.push('/');
+          }
+          return;
+        }
+
+        if (mounted) {
+          if (session?.user) {
+            setCurrentUser(session.user);
+          } else {
+            router.push('/');
+          }
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('Session check failed:', error);
+        if (mounted) {
+          router.push('/');
+        }
+      }
+    };
+
+    getSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!mounted) return;
+
+        if (event === 'SIGNED_OUT' || !session) {
+          setCurrentUser(null);
+          router.push('/');
+        } else if (event === 'SIGNED_IN' && session?.user) {
+          setCurrentUser(session.user);
+          setIsLoading(false);
+        }
+      }
+    );
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [router]);
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw error;
+      }
+      
+      toast({
+        title: "Signed Out",
+        description: "You have been successfully signed out.",
+      });
+      
+      router.push('/');
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Sign Out Failed",
+        description: error.message || "Failed to sign out",
+      });
+    }
+  };
+
+  // Show loading spinner while checking authentication
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Verifying authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-background">
       {/* Desktop Sidebar */}
       <div className="hidden lg:block w-64">
-        <Sidebar />
+        <Sidebar 
+          currentUser={currentUser} 
+          onSignOut={handleSignOut}
+          isLoading={isLoading}
+        />
       </div>
 
       {/* Mobile Sidebar */}
@@ -95,7 +244,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="p-0 w-64">
-          <Sidebar />
+          <Sidebar 
+            currentUser={currentUser} 
+            onSignOut={handleSignOut}
+            isLoading={isLoading}
+          />
         </SheetContent>
       </Sheet>
 
@@ -104,7 +257,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <header className="h-16 border-b bg-card flex items-center justify-between px-6">
           <div className="lg:hidden" /> {/* Spacer for mobile menu button */}
           <h1 className="text-xl font-semibold">Dashboard</h1>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
+            {currentUser && (
+              <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
+                <span>Welcome back,</span>
+                <span className="font-medium text-foreground">
+                  {currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0]}
+                </span>
+              </div>
+            )}
             <Button variant="outline" size="sm">
               Export Report
             </Button>
