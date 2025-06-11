@@ -45,3 +45,41 @@ export interface SubdomainData {
 }
 
 export type SubdomainSortField = 'name' | 'sslStatus' | 'usageStatus' | 'lastChecked';
+
+// New interfaces for vulnerability management
+export type SeverityLevel = 'critical' | 'high' | 'medium' | 'low' | 'informational';
+export type VulnerabilityStatus = 'open' | 'mitigated' | 'in-progress';
+
+export interface VulnerabilityData {
+  id: string;
+  cveId: string;
+  severity: SeverityLevel;
+  title: string;
+  description: string;
+  discoveryDate: string;
+  status: VulnerabilityStatus;
+  fullDescription: string;
+  affectedSystems: string[];
+  technicalDetails: string;
+  potentialImpact: string;
+  mitigationSteps: string[];
+  exploitationHistory: {
+    date: string;
+    description: string;
+    severity: string;
+  }[];
+  cvssScore?: number;
+  references?: string[];
+}
+
+export interface VulnerabilityFilters {
+  severity: SeverityLevel | 'all';
+  status: VulnerabilityStatus | 'all';
+  dateRange: {
+    from: Date | undefined;
+    to: Date | undefined;
+  };
+  searchTerm: string;
+}
+
+export type VulnerabilitySortField = 'cveId' | 'severity' | 'title' | 'discoveryDate' | 'status' | 'cvssScore';
