@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -8,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AnimatePresence, motion } from "framer-motion";
 import { validateDomain } from "@/lib/validation";
@@ -45,6 +46,7 @@ export default function DomainSearchForm() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     // Check for existing session
@@ -156,6 +158,10 @@ export default function DomainSearchForm() {
     }
   };
 
+  const handleGoToDashboard = (): void => {
+    router.push('/dashboard');
+  };
+
   return (
     <AnimatePresence mode="wait">
       {stage === "email" && (
@@ -248,11 +254,16 @@ export default function DomainSearchForm() {
                 )}
               </div>
             </CardContent>
-            <CardFooter>
-              <Button variant="outline" onClick={handleSignOut} className="w-full">
-                Sign Out
+            <CardFooter className="flex gap-2">
+              <Button 
+                variant="default" 
+                onClick={handleGoToDashboard} 
+                className="flex-1"
+              >
+                <BarChart3 className="mr-2 h-4 w-4" />
+                Go to Dashboard
               </Button>
-              <Button variant="outline" onClick={handleSignOut} className="w-full">
+              <Button variant="outline" onClick={handleSignOut} className="flex-1">
                 Sign Out
               </Button>
             </CardFooter>
