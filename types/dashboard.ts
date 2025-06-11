@@ -1,3 +1,5 @@
+import { DateRange } from 'react-day-picker';
+
 export interface SeverityDistribution {
   critical: number;
   high: number;
@@ -21,10 +23,7 @@ export interface ScanData {
 }
 
 export interface DashboardFilters {
-  dateRange: {
-    from: Date | undefined;
-    to: Date | undefined;
-  };
+  dateRange: DateRange;
 }
 
 export type SortField = 'scanDate' | 'subdomainsDiscovered' | 'vulnerabilitiesDetected';
@@ -75,10 +74,7 @@ export interface VulnerabilityData {
 export interface VulnerabilityFilters {
   severity: SeverityLevel | 'all';
   status: VulnerabilityStatus | 'all';
-  dateRange: {
-    from: Date | undefined;
-    to: Date | undefined;
-  };
+  dateRange: DateRange;
   searchTerm: string;
 }
 
