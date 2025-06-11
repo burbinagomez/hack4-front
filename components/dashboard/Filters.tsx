@@ -28,7 +28,7 @@ export default function Filters({
     to: filters.dateRange.to
   });
 
-  const handleDateRangeChange = (range: DateRange | undefined) => {
+  const handleDateRangeChange = (range: DateRange | undefined): void => {
     setDateRange(range);
     onFiltersChange({
       dateRange: {
@@ -38,8 +38,8 @@ export default function Filters({
     });
   };
 
-  const clearFilters = () => {
-    const clearedRange = { from: undefined, to: undefined };
+  const clearFilters = (): void => {
+    const clearedRange: DateRange = { from: undefined, to: undefined };
     setDateRange(clearedRange);
     onFiltersChange({ dateRange: clearedRange });
   };

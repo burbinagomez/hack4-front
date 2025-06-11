@@ -24,7 +24,7 @@ export default function DashboardPage() {
     }
 
     return mockScanData.filter((scan) => {
-      const scanDate = new Date(scan.scanDate);
+      const scanDate: Date = new Date(scan.scanDate);
       
       if (filters.dateRange.from && filters.dateRange.to) {
         return isWithinInterval(scanDate, {
@@ -45,9 +45,9 @@ export default function DashboardPage() {
     });
   }, [filters]);
 
-  const handleExportCSV = () => {
-    const headers = ['Scan Date', 'Subdomains Discovered', 'Vulnerabilities Detected', 'Critical', 'High', 'Medium', 'Low', 'Informational'];
-    const csvContent = [
+  const handleExportCSV = (): void => {
+    const headers: string[] = ['Scan Date', 'Subdomains Discovered', 'Vulnerabilities Detected', 'Critical', 'High', 'Medium', 'Low', 'Informational'];
+    const csvContent: string = [
       headers.join(','),
       ...filteredData.map(scan => [
         new Date(scan.scanDate).toISOString(),
@@ -61,16 +61,16 @@ export default function DashboardPage() {
       ].join(','))
     ].join('\n');
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const blob: Blob = new Blob([csvContent], { type: 'text/csv' });
+    const url: string = window.URL.createObjectURL(blob);
+    const a: HTMLAnchorElement = document.createElement('a');
     a.href = url;
     a.download = `security-scan-data-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
 
-  const handleExportPDF = () => {
+  const handleExportPDF = (): void => {
     // Placeholder for PDF export functionality
     console.log('PDF export functionality would be implemented here');
   };

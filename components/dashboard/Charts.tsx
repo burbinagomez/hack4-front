@@ -23,7 +23,7 @@ interface ChartsProps {
   data: ScanData[];
 }
 
-const SEVERITY_COLORS = {
+const SEVERITY_COLORS: Record<string, string> = {
   critical: '#ef4444',
   high: '#f97316',
   medium: '#eab308',
@@ -31,7 +31,7 @@ const SEVERITY_COLORS = {
   informational: '#6b7280'
 };
 
-const VULNERABILITY_COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#8dd1e1'];
+const VULNERABILITY_COLORS: string[] = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#8dd1e1'];
 
 export default function Charts({ data }: ChartsProps) {
   // Prepare timeline data
@@ -55,13 +55,13 @@ export default function Charts({ data }: ChartsProps) {
     });
   });
 
-  const vulnerabilityTypesData = Array.from(vulnerabilityTypesMap.entries()).map(
+  const vulnerabilityTypesData: Array<{ name: string; value: number }> = Array.from(vulnerabilityTypesMap.entries()).map(
     ([type, count]) => ({ name: type, value: count })
   );
 
   // Prepare severity distribution data
-  const severityData = Object.entries(
-    data.reduce((acc, scan) => {
+  const severityData: Array<{ severity: string; count: number; color: string }> = Object.entries(
+    data.reduce((acc: Record<string, number>, scan) => {
       Object.entries(scan.severityDistribution).forEach(([severity, count]) => {
         acc[severity] = (acc[severity] || 0) + count;
       });
@@ -74,10 +74,10 @@ export default function Charts({ data }: ChartsProps) {
   }));
 
   // Calculate risk assessment
-  const totalVulns = data.reduce((sum, scan) => sum + scan.vulnerabilitiesDetected, 0);
-  const totalCritical = data.reduce((sum, scan) => sum + scan.severityDistribution.critical, 0);
-  const totalHigh = data.reduce((sum, scan) => sum + scan.severityDistribution.high, 0);
-  const riskScore = Math.round(((totalCritical * 10 + totalHigh * 7) / Math.max(totalVulns, 1)) * 10);
+  const totalVulns: number = data.reduce((sum, scan) => sum + scan.vulnerabilitiesDetected, 0);
+  const totalCritical: number = data.reduce((sum, scan) => sum + scan.severityDistribution.critical, 0);
+  const totalHigh: number = data.reduce((sum, scan) => sum + scan.severityDistribution.high, 0);
+  const riskScore: number = Math.round(((totalCritical * 10 + totalHigh * 7) / Math.max(totalVulns, 1)) * 10);
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
@@ -99,7 +99,7 @@ export default function Charts({ data }: ChartsProps) {
                 <Tooltip
                   labelFormatter={(label, payload) => {
                     if (payload && payload[0]) {
-                      const fullDate = payload[0].payload.fullDate;
+                      const fullDate: string = payload[0].payload.fullDate;
                       return format(new Date(fullDate), 'MMM dd, yyyy HH:mm');
                     }
                     return label;
@@ -143,7 +143,7 @@ export default function Charts({ data }: ChartsProps) {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }: { name: string; percent: number }) => `${name} ${(percent * 100).toFixed(0)}%`}
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"

@@ -42,7 +42,7 @@ interface SubdomainsTableProps {
   data: SubdomainData[];
 }
 
-const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50];
+const ITEMS_PER_PAGE_OPTIONS: number[] = [10, 20, 50];
 
 function getSSLStatusIcon(status: SubdomainData['sslStatus']) {
   switch (status) {
@@ -60,7 +60,7 @@ function getSSLStatusIcon(status: SubdomainData['sslStatus']) {
 }
 
 function getSSLStatusBadge(status: SubdomainData['sslStatus']) {
-  const variants = {
+  const variants: Record<SubdomainData['sslStatus'], string> = {
     active: 'bg-green-100 text-green-800 hover:bg-green-200',
     expired: 'bg-red-100 text-red-800 hover:bg-red-200',
     pending: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
@@ -91,13 +91,13 @@ function getUsageStatusIcon(status: SubdomainData['usageStatus']) {
 }
 
 function getUsageStatusBadge(status: SubdomainData['usageStatus']) {
-  const variants = {
+  const variants: Record<SubdomainData['usageStatus'], string> = {
     'in-use': 'bg-green-100 text-green-800 hover:bg-green-200',
     'not-in-use': 'bg-red-100 text-red-800 hover:bg-red-200',
     'maintenance': 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
   };
 
-  const labels = {
+  const labels: Record<SubdomainData['usageStatus'], string> = {
     'in-use': 'In Use',
     'not-in-use': 'Not in Use',
     'maintenance': 'Maintenance'
@@ -114,13 +114,13 @@ function getUsageStatusBadge(status: SubdomainData['usageStatus']) {
 }
 
 export default function SubdomainsTable({ data }: SubdomainsTableProps) {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const [sortField, setSortField] = useState<SubdomainSortField>('name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
-  const handleSort = (field: SubdomainSortField) => {
+  const handleSort = (field: SubdomainSortField): void => {
     if (field === sortField) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -130,8 +130,8 @@ export default function SubdomainsTable({ data }: SubdomainsTableProps) {
     setCurrentPage(1);
   };
 
-  const filteredAndSortedData = useMemo(() => {
-    let filtered = data.filter((subdomain) =>
+  const filteredAndSortedData: SubdomainData[] = useMemo(() => {
+    let filtered: SubdomainData[] = data.filter((subdomain) =>
       subdomain.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subdomain.url.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -158,9 +158,9 @@ export default function SubdomainsTable({ data }: SubdomainsTableProps) {
     return filtered;
   }, [data, searchTerm, sortField, sortDirection]);
 
-  const totalPages = Math.ceil(filteredAndSortedData.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = filteredAndSortedData.slice(startIndex, startIndex + itemsPerPage);
+  const totalPages: number = Math.ceil(filteredAndSortedData.length / itemsPerPage);
+  const startIndex: number = (currentPage - 1) * itemsPerPage;
+  const paginatedData: SubdomainData[] = filteredAndSortedData.slice(startIndex, startIndex + itemsPerPage);
 
   const SortButton = ({ field, children }: { field: SubdomainSortField; children: React.ReactNode }) => (
     <Button
@@ -174,17 +174,17 @@ export default function SubdomainsTable({ data }: SubdomainsTableProps) {
     </Button>
   );
 
-  const handleEdit = (subdomain: SubdomainData) => {
+  const handleEdit = (subdomain: SubdomainData): void => {
     console.log('Edit subdomain:', subdomain);
     // TODO: Implement edit functionality
   };
 
-  const handleDelete = (subdomain: SubdomainData) => {
+  const handleDelete = (subdomain: SubdomainData): void => {
     console.log('Delete subdomain:', subdomain);
     // TODO: Implement delete functionality
   };
 
-  const handleViewDetails = (subdomain: SubdomainData) => {
+  const handleViewDetails = (subdomain: SubdomainData): void => {
     console.log('View details for subdomain:', subdomain);
     // TODO: Implement view details functionality
   };
@@ -210,7 +210,7 @@ export default function SubdomainsTable({ data }: SubdomainsTableProps) {
           <span className="text-sm text-muted-foreground">Show</span>
           <Select
             value={itemsPerPage.toString()}
-            onValueChange={(value) => {
+            onValueChange={(value: string) => {
               setItemsPerPage(Number(value));
               setCurrentPage(1);
             }}
@@ -219,7 +219,7 @@ export default function SubdomainsTable({ data }: SubdomainsTableProps) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {ITEMS_PER_PAGE_OPTIONS.map((option) => (
+              {ITEMS_PER_PAGE_OPTIONS.map((option: number) => (
                 <SelectItem key={option} value={option.toString()}>
                   {option}
                 </SelectItem>
@@ -334,7 +334,7 @@ export default function SubdomainsTable({ data }: SubdomainsTableProps) {
           
           <div className="flex items-center gap-1">
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              let pageNumber;
+              let pageNumber: number;
               if (totalPages <= 5) {
                 pageNumber = i + 1;
               } else if (currentPage <= 3) {

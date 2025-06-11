@@ -7,26 +7,26 @@ import { Button } from '@/components/ui/button';
 import { Plus, Download, RefreshCw, Shield, AlertTriangle, Clock, CheckCircle } from 'lucide-react';
 
 export default function VulnerabilitiesPage() {
-  const handleAddVulnerability = () => {
+  const handleAddVulnerability = (): void => {
     console.log('Add new vulnerability');
     // TODO: Implement add vulnerability functionality
   };
 
-  const handleExport = () => {
+  const handleExport = (): void => {
     console.log('Export vulnerabilities');
     // TODO: Implement export functionality
   };
 
-  const handleRefresh = () => {
+  const handleRefresh = (): void => {
     console.log('Refresh vulnerabilities');
     // TODO: Implement refresh functionality
   };
 
   // Calculate statistics
-  const totalVulnerabilities = mockVulnerabilityData.length;
-  const criticalAndHigh = mockVulnerabilityData.filter(v => v.severity === 'critical' || v.severity === 'high').length;
-  const openVulnerabilities = mockVulnerabilityData.filter(v => v.status === 'open').length;
-  const mitigatedVulnerabilities = mockVulnerabilityData.filter(v => v.status === 'mitigated').length;
+  const totalVulnerabilities: number = mockVulnerabilityData.length;
+  const criticalAndHigh: number = mockVulnerabilityData.filter(v => v.severity === 'critical' || v.severity === 'high').length;
+  const openVulnerabilities: number = mockVulnerabilityData.filter(v => v.status === 'open').length;
+  const mitigatedVulnerabilities: number = mockVulnerabilityData.filter(v => v.status === 'mitigated').length;
 
   return (
     <DashboardLayout>

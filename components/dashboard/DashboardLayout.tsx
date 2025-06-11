@@ -1,6 +1,5 @@
 "use client";
 
-
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -17,7 +16,13 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-const navigationItems = [
+interface NavigationItem {
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  href: string;
+}
+
+const navigationItems: NavigationItem[] = [
   {
     title: 'Dashboard',
     icon: BarChart3,
@@ -27,7 +32,6 @@ const navigationItems = [
     title: 'Subdomains',
     icon: Globe,
     href: '/dashboard/subdomains'
-
   },
   {
     title: 'Vulnerabilities',
@@ -51,11 +55,11 @@ interface SidebarProps {
 }
 
 function Sidebar({ className, currentUser, onSignOut, isLoading, currentPath, onLinkClick }: SidebarProps) {
-  const getUserInitials = (email: string) => {
+  const getUserInitials = (email: string): string => {
     return email.split('@')[0].slice(0, 2).toUpperCase();
   };
 
-  const getUserDisplayName = (email: string) => {
+  const getUserDisplayName = (email: string): string => {
     return email.split('@')[0];
   };
 
@@ -69,8 +73,8 @@ function Sidebar({ className, currentUser, onSignOut, isLoading, currentPath, on
       </div>
       
       <nav className="flex-1 space-y-2 p-4">
-        {navigationItems.map((item) => {
-          const isActive = currentPath === item.href;
+        {navigationItems.map((item: NavigationItem) => {
+          const isActive: boolean = currentPath === item.href;
           return (
             <Link key={item.href} href={item.href} onClick={onLinkClick}>
               <Button
@@ -132,17 +136,17 @@ function Sidebar({ className, currentUser, onSignOut, isLoading, currentPath, on
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname: string = usePathname();
   const { toast } = useToast();
 
   useEffect(() => {
-    let mounted = true;
+    let mounted: boolean = true;
 
-    const getSession = async () => {
+    const getSession = async (): Promise<void> => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         
@@ -193,7 +197,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     };
   }, [router]);
 
-  const handleSignOut = async () => {
+  const handleSignOut = async (): Promise<void> => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
@@ -215,8 +219,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   };
 
-  const getPageTitle = () => {
-    const currentItem = navigationItems.find(item => item.href === pathname);
+  const getPageTitle = (): string => {
+    const currentItem: NavigationItem | undefined = navigationItems.find(item => item.href === pathname);
     return currentItem ? currentItem.title : 'Dashboard';
   };
 
@@ -263,7 +267,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             currentPath={pathname}
             onLinkClick={() => setSidebarOpen(false)}
           />
-
         </SheetContent>
       </Sheet>
 

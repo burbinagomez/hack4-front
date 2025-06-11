@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -8,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AnimatePresence, motion } from "framer-motion";
 import { validateDomain } from "@/lib/validation";
@@ -40,15 +41,16 @@ type EmailFormValues = z.infer<ReturnType<typeof createEmailSchema>>;
 
 export default function DomainSearchForm() {
   const [stage, setStage] = useState<"email" | "otp" | "complete">("email");
-  const [domain, setDomain] = useState("");
-  const [email, setEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [domain, setDomain] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     // Check for existing session
-    const checkSession = async () => {
+    const checkSession = async (): Promise<void> => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         setUser(session.user);
@@ -95,7 +97,7 @@ export default function DomainSearchForm() {
     },
   });
 
-  const onEmailSubmit = async (data: EmailFormValues) => {
+  const onEmailSubmit = async (data: EmailFormValues): Promise<void> => {
     setIsLoading(true);
     try {
       // Send OTP using Supabase
@@ -131,14 +133,14 @@ export default function DomainSearchForm() {
     }
   };
 
-  const resetForm = () => {
+  const resetForm = (): void => {
     emailForm.reset();
     setStage("email");
     setDomain("");
     setEmail("");
   };
 
-  const handleSignOut = async () => {
+  const handleSignOut = async (): Promise<void> => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
@@ -154,6 +156,10 @@ export default function DomainSearchForm() {
         description: error.message || "Failed to sign out",
       });
     }
+  };
+
+  const handleGoToDashboard = (): void => {
+    router.push('/dashboard');
   };
 
   return (
@@ -248,8 +254,16 @@ export default function DomainSearchForm() {
                 )}
               </div>
             </CardContent>
-            <CardFooter>
-              <Button variant="outline" onClick={handleSignOut} className="w-full">
+            <CardFooter className="flex gap-2">
+              <Button 
+                variant="default" 
+                onClick={handleGoToDashboard} 
+                className="flex-1"
+              >
+                <BarChart3 className="mr-2 h-4 w-4" />
+                Go to Dashboard
+              </Button>
+              <Button variant="outline" onClick={handleSignOut} className="flex-1">
                 Sign Out
               </Button>
             </CardFooter>

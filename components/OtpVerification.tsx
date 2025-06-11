@@ -17,12 +17,12 @@ interface OtpVerificationProps {
 }
 
 export default function OtpVerification({ email, domain, onBack, onComplete }: OtpVerificationProps) {
-  const [otp, setOtp] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isResending, setIsResending] = useState(false);
+  const [otp, setOtp] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isResending, setIsResending] = useState<boolean>(false);
   const { toast } = useToast();
 
-  const handleVerify = async () => {
+  const handleVerify = async (): Promise<void> => {
     if (otp.length !== 6) {
       toast({
         variant: "destructive",
@@ -45,8 +45,8 @@ export default function OtpVerification({ email, domain, onBack, onComplete }: O
       }
 
       if (data.user) {
-        const headers = new Headers();
-        const apiKey = process.env.NEXT_PUBLIC_API_KEY || ""
+        const headers: Headers = new Headers();
+        const apiKey: string = process.env.NEXT_PUBLIC_API_KEY || ""
         headers.append("Content-Type", "application/json");
         headers.append("x-api-key", apiKey);
         fetch(process.env.NEXT_PUBLIC_API+"/report",{
@@ -61,8 +61,8 @@ export default function OtpVerification({ email, domain, onBack, onComplete }: O
         onComplete();
       }
     } catch (error: any) {
-      const authError = error as AuthError;
-      let errorMessage = "Failed to verify OTP";
+      const authError: AuthError = error as AuthError;
+      let errorMessage: string = "Failed to verify OTP";
       
       // Handle specific Supabase auth errors
       if (authError.message) {
@@ -85,7 +85,7 @@ export default function OtpVerification({ email, domain, onBack, onComplete }: O
     }
   };
 
-  const handleResend = async () => {
+  const handleResend = async (): Promise<void> => {
     setIsResending(true);
     try {
       const { error } = await supabase.auth.signInWithOtp({
@@ -110,7 +110,7 @@ export default function OtpVerification({ email, domain, onBack, onComplete }: O
       // Clear the current OTP input
       setOtp("");
     } catch (error: any) {
-      const authError = error as AuthError;
+      const authError: AuthError = error as AuthError;
       toast({
         variant: "destructive",
         title: "Failed to Resend",
@@ -138,7 +138,7 @@ export default function OtpVerification({ email, domain, onBack, onComplete }: O
             disabled={isLoading}
           >
             <InputOTPGroup>
-              {Array.from({ length: 6 }, (_, index) => (
+              {Array.from({ length: 6 }, (_, index: number) => (
                 <InputOTPSlot key={index} index={index} />
               ))}
             </InputOTPGroup>
