@@ -77,6 +77,30 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-500;
   }
+}
+
+/* Custom theme transition classes */
+.theme-transition {
+  transition: background-color 0.5s ease-in-out, color 0.5s ease-in-out, border-color 0.3s ease-in-out;
+}
+
+/* Enhanced focus states for better accessibility */
+.focus-enhanced:focus-visible {
+  @apply ring-2 ring-ring ring-offset-2 ring-offset-background;
+}
+
+/* Smooth logo transitions */
+.logo-transition {
+  transition: opacity 0.5s ease-in-out, transform 0.3s ease-in-out;
+}
+
+/* Dark mode specific enhancements */
+.dark .gradient-dark {
+  background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%);
+}
+
+.light .gradient-light {
+  background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%);
 }

@@ -7,7 +7,12 @@ import { Toaster } from "@/components/ui/toaster"; // Tu componente Toaster
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     // ThemeProvider debe estar aquí para que el tema sea global
-    <NextThemesProvider attribute="class" defaultTheme="light" enableSystem>
+    <NextThemesProvider 
+      attribute="class" 
+      defaultTheme="system" 
+      enableSystem
+      disableTransitionOnChange={false}
+    >
       {children}
       <Toaster /> {/* El Toaster también es un componente de cliente y debe estar dentro de los proveedores */}
     </NextThemesProvider>
