@@ -7,20 +7,26 @@ import { Button } from '@/components/ui/button';
 import { Plus, Download, RefreshCw } from 'lucide-react';
 
 export default function SubdomainsPage() {
-  const handleAddSubdomain = () => {
+  const handleAddSubdomain = (): void => {
     console.log('Add new subdomain');
     // TODO: Implement add subdomain functionality
   };
 
-  const handleExport = () => {
+  const handleExport = (): void => {
     console.log('Export subdomains');
     // TODO: Implement export functionality
   };
 
-  const handleRefresh = () => {
+  const handleRefresh = (): void => {
     console.log('Refresh subdomains');
     // TODO: Implement refresh functionality
   };
+
+  // Calculate statistics
+  const totalSubdomains: number = mockSubdomainData.length;
+  const activeSSL: number = mockSubdomainData.filter(s => s.sslStatus === 'active').length;
+  const inUse: number = mockSubdomainData.filter(s => s.usageStatus === 'in-use').length;
+  const issues: number = mockSubdomainData.filter(s => s.sslStatus === 'expired' || s.usageStatus === 'not-in-use').length;
 
   return (
     <DashboardLayout>
@@ -56,7 +62,7 @@ export default function SubdomainsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Subdomains</p>
-                <p className="text-2xl font-bold">{mockSubdomainData.length}</p>
+                <p className="text-2xl font-bold">{totalSubdomains}</p>
               </div>
               <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
                 <div className="h-4 w-4 rounded-full bg-blue-600"></div>
@@ -68,9 +74,7 @@ export default function SubdomainsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Active SSL</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {mockSubdomainData.filter(s => s.sslStatus === 'active').length}
-                </p>
+                <p className="text-2xl font-bold text-green-600">{activeSSL}</p>
               </div>
               <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
                 <div className="h-4 w-4 rounded-full bg-green-600"></div>
@@ -82,9 +86,7 @@ export default function SubdomainsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">In Use</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {mockSubdomainData.filter(s => s.usageStatus === 'in-use').length}
-                </p>
+                <p className="text-2xl font-bold text-blue-600">{inUse}</p>
               </div>
               <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
                 <div className="h-4 w-4 rounded-full bg-blue-600"></div>
@@ -96,9 +98,7 @@ export default function SubdomainsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Issues</p>
-                <p className="text-2xl font-bold text-red-600">
-                  {mockSubdomainData.filter(s => s.sslStatus === 'expired' || s.usageStatus === 'not-in-use').length}
-                </p>
+                <p className="text-2xl font-bold text-red-600">{issues}</p>
               </div>
               <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center">
                 <div className="h-4 w-4 rounded-full bg-red-600"></div>

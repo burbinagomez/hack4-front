@@ -27,7 +27,7 @@ interface DataTableProps {
   onExport: () => void;
 }
 
-const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20, 50];
+const ITEMS_PER_PAGE_OPTIONS: number[] = [5, 10, 20, 50];
 
 function getSeverityColor(severity: string): string {
   switch (severity) {
@@ -68,10 +68,10 @@ function SeverityBadges({ distribution }: { distribution: ScanData['severityDist
 export default function DataTable({ data, onExport }: DataTableProps) {
   const [sortField, setSortField] = useState<SortField>('scanDate');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
-  const handleSort = (field: SortField) => {
+  const handleSort = (field: SortField): void => {
     if (field === sortField) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -81,7 +81,7 @@ export default function DataTable({ data, onExport }: DataTableProps) {
     setCurrentPage(1);
   };
 
-  const sortedData = [...data].sort((a, b) => {
+  const sortedData: ScanData[] = [...data].sort((a, b) => {
     let aValue: any = a[sortField];
     let bValue: any = b[sortField];
 
@@ -97,9 +97,9 @@ export default function DataTable({ data, onExport }: DataTableProps) {
     }
   });
 
-  const totalPages = Math.ceil(sortedData.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = sortedData.slice(startIndex, startIndex + itemsPerPage);
+  const totalPages: number = Math.ceil(sortedData.length / itemsPerPage);
+  const startIndex: number = (currentPage - 1) * itemsPerPage;
+  const paginatedData: ScanData[] = sortedData.slice(startIndex, startIndex + itemsPerPage);
 
   const SortButton = ({ field, children }: { field: SortField; children: React.ReactNode }) => (
     <Button
@@ -120,7 +120,7 @@ export default function DataTable({ data, onExport }: DataTableProps) {
           <span className="text-sm text-muted-foreground">Show</span>
           <Select
             value={itemsPerPage.toString()}
-            onValueChange={(value) => {
+            onValueChange={(value: string) => {
               setItemsPerPage(Number(value));
               setCurrentPage(1);
             }}
@@ -129,7 +129,7 @@ export default function DataTable({ data, onExport }: DataTableProps) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {ITEMS_PER_PAGE_OPTIONS.map((option) => (
+              {ITEMS_PER_PAGE_OPTIONS.map((option: number) => (
                 <SelectItem key={option} value={option.toString()}>
                   {option}
                 </SelectItem>
@@ -197,7 +197,7 @@ export default function DataTable({ data, onExport }: DataTableProps) {
           
           <div className="flex items-center gap-1">
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              let pageNumber;
+              let pageNumber: number;
               if (totalPages <= 5) {
                 pageNumber = i + 1;
               } else if (currentPage <= 3) {

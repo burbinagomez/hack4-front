@@ -51,7 +51,7 @@ interface VulnerabilitiesTableProps {
   data: VulnerabilityData[];
 }
 
-const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50];
+const ITEMS_PER_PAGE_OPTIONS: number[] = [10, 20, 50];
 
 function getSeverityIcon(severity: SeverityLevel) {
   switch (severity) {
@@ -71,7 +71,7 @@ function getSeverityIcon(severity: SeverityLevel) {
 }
 
 function getSeverityBadge(severity: SeverityLevel) {
-  const variants = {
+  const variants: Record<SeverityLevel, string> = {
     critical: 'bg-red-100 text-red-800 hover:bg-red-200 border-red-200',
     high: 'bg-orange-100 text-orange-800 hover:bg-orange-200 border-orange-200',
     medium: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-200',
@@ -103,13 +103,13 @@ function getStatusIcon(status: VulnerabilityStatus) {
 }
 
 function getStatusBadge(status: VulnerabilityStatus) {
-  const variants = {
+  const variants: Record<VulnerabilityStatus, string> = {
     open: 'bg-red-100 text-red-800 hover:bg-red-200 border-red-200',
     'in-progress': 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-200',
     mitigated: 'bg-green-100 text-green-800 hover:bg-green-200 border-green-200'
   };
 
-  const labels = {
+  const labels: Record<VulnerabilityStatus, string> = {
     open: 'Open',
     'in-progress': 'In Progress',
     mitigated: 'Mitigated'
@@ -126,22 +126,22 @@ function getStatusBadge(status: VulnerabilityStatus) {
 }
 
 function VulnerabilityDetailDialog({ vulnerability }: { vulnerability: VulnerabilityData }) {
-  const handleSimulateAttack = () => {
+  const handleSimulateAttack = (): void => {
     console.log('Simulating attack for:', vulnerability.cveId);
     // TODO: Implement attack simulation
   };
 
-  const handleMitigate = () => {
+  const handleMitigate = (): void => {
     console.log('Mitigating vulnerability:', vulnerability.cveId);
     // TODO: Implement mitigation
   };
 
-  const handleGenerateReport = () => {
+  const handleGenerateReport = (): void => {
     console.log('Generating report for:', vulnerability.cveId);
     // TODO: Implement report generation
   };
 
-  const handleTrackProgress = () => {
+  const handleTrackProgress = (): void => {
     console.log('Tracking progress for:', vulnerability.cveId);
     // TODO: Implement progress tracking
   };
@@ -180,7 +180,7 @@ function VulnerabilityDetailDialog({ vulnerability }: { vulnerability: Vulnerabi
         <div>
           <h3 className="text-lg font-semibold mb-2">Affected Systems</h3>
           <div className="flex flex-wrap gap-2">
-            {vulnerability.affectedSystems.map((system, index) => (
+            {vulnerability.affectedSystems.map((system: string, index: number) => (
               <Badge key={index} variant="outline" className="font-mono">
                 {system}
               </Badge>
@@ -206,7 +206,7 @@ function VulnerabilityDetailDialog({ vulnerability }: { vulnerability: Vulnerabi
         <div>
           <h3 className="text-lg font-semibold mb-2">Recommended Mitigation Steps</h3>
           <ul className="space-y-2">
-            {vulnerability.mitigationSteps.map((step, index) => (
+            {vulnerability.mitigationSteps.map((step: string, index: number) => (
               <li key={index} className="flex items-start gap-2">
                 <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <span className="text-xs font-medium text-primary">{index + 1}</span>
@@ -222,7 +222,7 @@ function VulnerabilityDetailDialog({ vulnerability }: { vulnerability: Vulnerabi
           <div>
             <h3 className="text-lg font-semibold mb-2">Exploitation History</h3>
             <div className="space-y-2">
-              {vulnerability.exploitationHistory.map((event, index) => (
+              {vulnerability.exploitationHistory.map((event, index: number) => (
                 <div key={index} className="flex items-start gap-3 p-3 bg-muted rounded-lg">
                   <Activity className="h-4 w-4 text-muted-foreground mt-0.5" />
                   <div className="flex-1">
@@ -242,7 +242,7 @@ function VulnerabilityDetailDialog({ vulnerability }: { vulnerability: Vulnerabi
           <div>
             <h3 className="text-lg font-semibold mb-2">References</h3>
             <ul className="space-y-1">
-              {vulnerability.references.map((ref, index) => (
+              {vulnerability.references.map((ref: string, index: number) => (
                 <li key={index}>
                   <a 
                     href={ref} 
@@ -291,11 +291,11 @@ export default function VulnerabilitiesTable({ data }: VulnerabilitiesTableProps
   });
   const [sortField, setSortField] = useState<VulnerabilitySortField>('discoveryDate');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
-  const handleSort = (field: VulnerabilitySortField) => {
+  const handleSort = (field: VulnerabilitySortField): void => {
     if (field === sortField) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -305,7 +305,7 @@ export default function VulnerabilitiesTable({ data }: VulnerabilitiesTableProps
     setCurrentPage(1);
   };
 
-  const handleDateRangeChange = (range: DateRange | undefined) => {
+  const handleDateRangeChange = (range: DateRange | undefined): void => {
     setDateRange(range);
     setFilters(prev => ({
       ...prev,
@@ -317,7 +317,7 @@ export default function VulnerabilitiesTable({ data }: VulnerabilitiesTableProps
     setCurrentPage(1);
   };
 
-  const clearFilters = () => {
+  const clearFilters = (): void => {
     setFilters({
       severity: 'all',
       status: 'all',
@@ -328,11 +328,11 @@ export default function VulnerabilitiesTable({ data }: VulnerabilitiesTableProps
     setCurrentPage(1);
   };
 
-  const filteredAndSortedData = useMemo(() => {
-    let filtered = data.filter((vulnerability) => {
+  const filteredAndSortedData: VulnerabilityData[] = useMemo(() => {
+    let filtered: VulnerabilityData[] = data.filter((vulnerability) => {
       // Search filter
       if (filters.searchTerm) {
-        const searchLower = filters.searchTerm.toLowerCase();
+        const searchLower: string = filters.searchTerm.toLowerCase();
         if (
           !vulnerability.cveId.toLowerCase().includes(searchLower) &&
           !vulnerability.title.toLowerCase().includes(searchLower) &&
@@ -354,7 +354,7 @@ export default function VulnerabilitiesTable({ data }: VulnerabilitiesTableProps
 
       // Date range filter
       if (filters.dateRange.from || filters.dateRange.to) {
-        const vulnDate = new Date(vulnerability.discoveryDate);
+        const vulnDate: Date = new Date(vulnerability.discoveryDate);
         if (filters.dateRange.from && filters.dateRange.to) {
           if (!isWithinInterval(vulnDate, {
             start: filters.dateRange.from,
@@ -381,7 +381,7 @@ export default function VulnerabilitiesTable({ data }: VulnerabilitiesTableProps
         aValue = new Date(aValue).getTime();
         bValue = new Date(bValue).getTime();
       } else if (sortField === 'severity') {
-        const severityOrder = { critical: 4, high: 3, medium: 2, low: 1, informational: 0 };
+        const severityOrder: Record<SeverityLevel, number> = { critical: 4, high: 3, medium: 2, low: 1, informational: 0 };
         aValue = severityOrder[aValue as SeverityLevel];
         bValue = severityOrder[bValue as SeverityLevel];
       } else if (typeof aValue === 'string') {
@@ -399,9 +399,9 @@ export default function VulnerabilitiesTable({ data }: VulnerabilitiesTableProps
     return filtered;
   }, [data, filters, sortField, sortDirection]);
 
-  const totalPages = Math.ceil(filteredAndSortedData.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = filteredAndSortedData.slice(startIndex, startIndex + itemsPerPage);
+  const totalPages: number = Math.ceil(filteredAndSortedData.length / itemsPerPage);
+  const startIndex: number = (currentPage - 1) * itemsPerPage;
+  const paginatedData: VulnerabilityData[] = filteredAndSortedData.slice(startIndex, startIndex + itemsPerPage);
 
   const SortButton = ({ field, children }: { field: VulnerabilitySortField; children: React.ReactNode }) => (
     <Button
@@ -415,8 +415,8 @@ export default function VulnerabilitiesTable({ data }: VulnerabilitiesTableProps
     </Button>
   );
 
-  const hasActiveFilters = filters.severity !== 'all' || filters.status !== 'all' || 
-                          filters.dateRange.from || filters.dateRange.to || filters.searchTerm;
+  const hasActiveFilters: boolean = filters.severity !== 'all' || filters.status !== 'all' || 
+                          filters.dateRange.from !== undefined || filters.dateRange.to !== undefined || filters.searchTerm !== '';
 
   return (
     <div className="space-y-6">
@@ -535,7 +535,7 @@ export default function VulnerabilitiesTable({ data }: VulnerabilitiesTableProps
           <span className="text-sm text-muted-foreground">Show</span>
           <Select
             value={itemsPerPage.toString()}
-            onValueChange={(value) => {
+            onValueChange={(value: string) => {
               setItemsPerPage(Number(value));
               setCurrentPage(1);
             }}
@@ -544,7 +544,7 @@ export default function VulnerabilitiesTable({ data }: VulnerabilitiesTableProps
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {ITEMS_PER_PAGE_OPTIONS.map((option) => (
+              {ITEMS_PER_PAGE_OPTIONS.map((option: number) => (
                 <SelectItem key={option} value={option.toString()}>
                   {option}
                 </SelectItem>
@@ -655,7 +655,7 @@ export default function VulnerabilitiesTable({ data }: VulnerabilitiesTableProps
           
           <div className="flex items-center gap-1">
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              let pageNumber;
+              let pageNumber: number;
               if (totalPages <= 5) {
                 pageNumber = i + 1;
               } else if (currentPage <= 3) {

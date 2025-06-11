@@ -40,15 +40,15 @@ type EmailFormValues = z.infer<ReturnType<typeof createEmailSchema>>;
 
 export default function DomainSearchForm() {
   const [stage, setStage] = useState<"email" | "otp" | "complete">("email");
-  const [domain, setDomain] = useState("");
-  const [email, setEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [domain, setDomain] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     // Check for existing session
-    const checkSession = async () => {
+    const checkSession = async (): Promise<void> => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         setUser(session.user);
@@ -95,7 +95,7 @@ export default function DomainSearchForm() {
     },
   });
 
-  const onEmailSubmit = async (data: EmailFormValues) => {
+  const onEmailSubmit = async (data: EmailFormValues): Promise<void> => {
     setIsLoading(true);
     try {
       // Send OTP using Supabase
@@ -131,14 +131,14 @@ export default function DomainSearchForm() {
     }
   };
 
-  const resetForm = () => {
+  const resetForm = (): void => {
     emailForm.reset();
     setStage("email");
     setDomain("");
     setEmail("");
   };
 
-  const handleSignOut = async () => {
+  const handleSignOut = async (): Promise<void> => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
