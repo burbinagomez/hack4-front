@@ -252,6 +252,9 @@ export default function DomainSearchForm() {
               <Button variant="outline" onClick={handleSignOut} className="w-full">
                 Sign Out
               </Button>
+              <Button variant="outline" onClick={handleSignOut} className="w-full">
+                Sign Out
+              </Button>
             </CardFooter>
           </Card>
         </motion.div>
