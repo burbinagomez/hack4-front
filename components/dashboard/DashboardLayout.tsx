@@ -1,5 +1,6 @@
 "use client";
 
+
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -26,6 +27,7 @@ const navigationItems = [
     title: 'Subdomains',
     icon: Globe,
     href: '/dashboard/subdomains'
+
   },
   {
     title: 'Vulnerabilities',
@@ -261,6 +263,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             currentPath={pathname}
             onLinkClick={() => setSidebarOpen(false)}
           />
+
         </SheetContent>
       </Sheet>
 
@@ -278,6 +281,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 </span>
               </div>
             )}
+
             <Button variant="outline" size="sm">
               Export Report
             </Button>
