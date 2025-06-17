@@ -7,8 +7,8 @@ import { Providers } from './providers'; // Importa tu componente de proveedores
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Mi Aplicación con Cognito', // Actualiza tu título
-  description: 'Aplicación de búsqueda de dominios y verificación con Cognito.', // Actualiza tu descripción
+  title: 'Hacker4me', // Actualiza tu título
+  description: 'Find vulnerabilities in your projects', // Actualiza tu descripción
 };
 
 export default function RootLayout({
