@@ -1,0 +1,8 @@
+# Supabase Configuration
+
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-supabase
+
+# API Configuration (if needed)
+NEXT_PUBLIC_API=your-api-endpoint
+NEXT_PUBLIC_API_KEY=your_api_key
