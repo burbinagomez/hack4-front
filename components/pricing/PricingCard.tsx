@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Check, Star, Zap, Shield } from 'lucide-react';
 import { PricingPlan, BillingCycle } from '@/types/pricing';
 import { cn } from '@/lib/utils';
+import StripeCheckout from './StripeCheckout';
+import { useToast } from '@/hooks/use-toast';
 
 interface PricingCardProps {
   plan: PricingPlan;
@@ -27,6 +29,23 @@ export default function PricingCard({ plan, billingCycle, onSubscribe }: Pricing
     : 0;
 
   const IconComponent = planIcons[plan.id as keyof typeof planIcons] || Shield;
+  const { toast } = useToast();
+
+  const handleBasicPlan = () => {
+    toast({
+      title: "Welcome to Basic Plan!",
+      description: "You can start using our free tier immediately.",
+    });
+    onSubscribe(plan.id);
+  };
+
+  const handleEnterprisePlan = () => {
+    toast({
+      title: "Enterprise Inquiry",
+      description: "Our sales team will contact you within 24 hours.",
+    });
+    onSubscribe(plan.id);
+  };
 
   return (
     <Card className={cn(
@@ -114,17 +133,38 @@ export default function PricingCard({ plan, billingCycle, onSubscribe }: Pricing
       </CardContent>
 
       <CardFooter className="pt-6">
-        <Button 
-          className={cn(
-            "w-full font-semibold transition-all duration-200",
-            plan.highlighted && "bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary"
-          )}
-          variant={plan.buttonVariant}
-          size="lg"
-          onClick={() => onSubscribe(plan.id)}
-        >
-          {plan.buttonText}
-        </Button>
+        {plan.id === 'basic' ? (
+          <Button 
+            className="w-full font-semibold transition-all duration-200"
+            variant={plan.buttonVariant}
+            size="lg"
+            onClick={handleBasicPlan}
+          >
+            {plan.buttonText}
+          </Button>
+        ) : plan.id === 'enterprise' ? (
+          <Button 
+            className="w-full font-semibold transition-all duration-200"
+            variant={plan.buttonVariant}
+            size="lg"
+            onClick={handleEnterprisePlan}
+          >
+            {plan.buttonText}
+          </Button>
+        ) : (
+          <StripeCheckout
+            planId={plan.id as 'professional' | 'enterprise'}
+            billingCycle={billingCycle}
+            className={cn(
+              "w-full font-semibold transition-all duration-200",
+              plan.highlighted && "bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary"
+            )}
+            variant={plan.buttonVariant}
+            size="lg"
+          >
+            {plan.buttonText}
+          </StripeCheckout>
+        )}
       </CardFooter>
     </Card>
   );

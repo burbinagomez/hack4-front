@@ -8,6 +8,7 @@ import { Check, Star, Zap, Shield, ArrowRight } from 'lucide-react';
 import { PricingPlan, BillingCycle } from '@/types/pricing';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import StripeCheckout from '@/components/pricing/StripeCheckout';
 
 const pricingPlans: PricingPlan[] = [
   {
@@ -95,6 +96,23 @@ function PricingCard({ plan, billingCycle, onSubscribe, compact = false }: Prici
     : 0;
 
   const IconComponent = planIcons[plan.id as keyof typeof planIcons] || Shield;
+  const { toast } = useToast();
+
+  const handleBasicPlan = () => {
+    toast({
+      title: "Welcome to Basic Plan!",
+      description: "You can start using our free tier immediately.",
+    });
+    onSubscribe(plan.id);
+  };
+
+  const handleEnterprisePlan = () => {
+    toast({
+      title: "Enterprise Inquiry",
+      description: "Our sales team will contact you within 24 hours.",
+    });
+    onSubscribe(plan.id);
+  };
 
   return (
     <Card className={cn(
@@ -171,19 +189,46 @@ function PricingCard({ plan, billingCycle, onSubscribe, compact = false }: Prici
       </CardContent>
 
       <CardFooter className={cn(compact ? "pt-4 px-4" : "pt-6")}>
-        <Button 
-          className={cn(
-            "w-full font-semibold transition-all duration-200",
-            plan.highlighted && "bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary",
-            compact && "text-sm"
-          )}
-          variant={plan.buttonVariant}
-          size={compact ? "default" : "lg"}
-          onClick={() => onSubscribe(plan.id)}
-        >
-          {plan.buttonText}
-          {plan.id !== 'basic' && <ArrowRight className="ml-2 h-4 w-4" />}
-        </Button>
+        {plan.id === 'basic' ? (
+          <Button 
+            className={cn(
+              "w-full font-semibold transition-all duration-200",
+              compact && "text-sm"
+            )}
+            variant={plan.buttonVariant}
+            size={compact ? "default" : "lg"}
+            onClick={handleBasicPlan}
+          >
+            {plan.buttonText}
+          </Button>
+        ) : plan.id === 'enterprise' ? (
+          <Button 
+            className={cn(
+              "w-full font-semibold transition-all duration-200",
+              compact && "text-sm"
+            )}
+            variant={plan.buttonVariant}
+            size={compact ? "default" : "lg"}
+            onClick={handleEnterprisePlan}
+          >
+            {plan.buttonText}
+          </Button>
+        ) : (
+          <StripeCheckout
+            planId={plan.id as 'professional' | 'enterprise'}
+            billingCycle={billingCycle}
+            className={cn(
+              "w-full font-semibold transition-all duration-200",
+              plan.highlighted && "bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary",
+              compact && "text-sm"
+            )}
+            variant={plan.buttonVariant}
+            size={compact ? "default" : "lg"}
+          >
+            {plan.buttonText}
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </StripeCheckout>
+        )}
       </CardFooter>
     </Card>
   );
@@ -194,25 +239,8 @@ export default function HomePricingSection() {
   const { toast } = useToast();
 
   const handleSubscribe = (planId: string): void => {
-    const plan = pricingPlans.find(p => p.id === planId);
-    if (!plan) return;
-
-    if (planId === 'basic') {
-      toast({
-        title: "Welcome to Basic Plan!",
-        description: "You can start using our free tier immediately.",
-      });
-    } else if (planId === 'enterprise') {
-      toast({
-        title: "Enterprise Inquiry",
-        description: "Our sales team will contact you within 24 hours.",
-      });
-    } else {
-      toast({
-        title: "Starting Free Trial",
-        description: "Your 14-day free trial is being set up.",
-      });
-    }
+    // This is handled by individual card components
+    console.log(`Subscription initiated for plan: ${planId}`);
   };
 
   return (

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Menu, Shield, Globe, BarChart3, Settings, User, LogOut, Loader2 } from 'lucide-react';
+import { Menu, Shield, Globe, BarChart3, Settings, User, LogOut, Loader2, CreditCard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
@@ -37,6 +37,11 @@ const navigationItems: NavigationItem[] = [
     title: 'Vulnerabilities',
     icon: Shield,
     href: '/dashboard/vulnerabilities'
+  },
+  {
+    title: 'Billing',
+    icon: CreditCard,
+    href: '/dashboard/billing'
   },
   {
     title: 'Settings',
